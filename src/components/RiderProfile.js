@@ -171,8 +171,9 @@ export const RiderProfile = () => {
             <Grid container spacing={2}>
                 <Grid className={classes.profile} item xs={4}>
                     {isloading ? <p>loading....</p> : <div>
-                        <h1>{isRider ? 'Rider' : 'Driver'} profile</h1>
+                        <h1>{isRider ? 'Rider' : 'Driver'} profile</h1>        
                         <h3>Name: {Userdata?.name}</h3>
+                        {!isRider? <h3><br/>Vehical: {Userdata?.vehical}</h3> : ''}
                         <div className={classes.flex}>
                             <div><h3>Rating: {Userdata?.entry ? Math.floor(Userdata?.rating / Userdata?.entry) : Userdata?.rating} </h3>
                             </div><div className={classes.star}><StarsRoundedIcon />
