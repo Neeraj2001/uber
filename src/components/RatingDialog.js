@@ -33,7 +33,7 @@ const labels = {
     const handleListItemClick = (value) => {
         onClose(value);
     };
-    console.log(pickRide)
+    // console.log(pickRide)
     return (
         open && <Dialog aria-labelledby="simple-dialog-title" open={open} >
             <DialogTitle id="simple-dialog-title">Rating</DialogTitle>

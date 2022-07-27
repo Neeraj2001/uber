@@ -84,14 +84,14 @@ export default function SignIn() {
         // fetchPolicy: "network-only",
         onCompleted: (data) => {
             const userDetails = type === 'driver' ? data?.uberdriver : data?.uberrider;
-            console.log(userDetails?.length)
+            // console.log(userDetails?.length)
             if (!userDetails?.length) alert("invalid username or password");
 
             let UserExist = ''
             if (Array.isArray(userDetails) && userDetails.length > 0) {
                 UserExist = userDetails[0].id
             }
-            console.log({ userDetails, data })
+            // console.log({ userDetails, data })
             if (userDetails?.length) {
                 localStorage.setItem('loginType', type);
                 navigate(`/${type}/${UserExist}`);

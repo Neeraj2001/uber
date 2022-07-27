@@ -45,14 +45,14 @@ export const RiderProfile = () => {
     const { loading: dloading, error: derror, data: ddata } = useQuery(GET_DRIVER_DETAILS);
     if (rerror) {
         sendErrorToSentry({
-            name: "currenuser connection",
+            name: "rider details",
             message: "Fetching connection failed",
             extra: [{ type: "errorEncounter", rerror }],
         });
     }
     if (derror) {
         sendErrorToSentry({
-            name: "currenuser connection",
+            name: "driver details",
             message: "Fetching connection failed",
             extra: [{ type: "errorEncounter", derror }],
         });
@@ -100,6 +100,7 @@ export const RiderProfile = () => {
     };
     useEffect(() => {
         window.addEventListener('popstate', (event) => {
+            localStorage.clear();
             navigate('/login');
         });
     }, [])
@@ -120,7 +121,7 @@ export const RiderProfile = () => {
         })();
         // console.log(finaljson, { allRides, id })
         if (loginType === 'rider') {
-            console.log(pickRide?.trips)
+            // console.log(pickRide?.trips)
             updateDriverRating({
                 variables: {
                     id: pickRide?.id,
@@ -178,7 +179,7 @@ export const RiderProfile = () => {
                             </div></div>
                         <h3>Rides: {Userdata?.trips}</h3>
                         <Button className={classes.button} disable={isloading} onClick={handleClickOpen}>End Ride</Button> <br />
-                        <Button className={classes.button} onClick={() => navigate('/login')}>Logout</Button>
+                        <Button className={classes.button} onClick={() =>{localStorage.clear(); navigate('/login');}}>Logout</Button>
                     </div>}
                 </Grid>
                 <Grid item xs={8}>

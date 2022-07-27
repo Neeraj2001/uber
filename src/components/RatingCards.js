@@ -43,7 +43,7 @@ const labels = {
 };
 export const RatingCards = (props) => {
     const {  rides } = props
-    console.log( {rides})
+    // console.log( {rides})
     const classes = useStyles();
     return (
         rides.map((ride, index) =>
