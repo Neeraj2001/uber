@@ -17,7 +17,7 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_DRIVER_AUTH } from '../queries/GET_DRIVER_AUTH';
 import { GET_RIDER_AUTH } from '../queries/GET_RIDER_AUTH';
 import { useNavigate } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
+import { sendErrorToSentry } from "../index.js";
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
@@ -56,15 +56,8 @@ export default function SignIn() {
     const [name, setName] = useState('');
     const [type, setType] = useState('rider');
     const [password, setPassword] = useState('');
-    const [trigger, setTrigger] = useState(true);
-    // const [valid, setValid] = useState(false);
     const navigate = useNavigate();
-    // const query = type === 'driver' ? GET_DRIVER_AUTH : GET_RIDER_AUTH
-    // const { loading, error, data } = useQuery(type === 'driver' ? GET_DRIVER_AUTH : GET_RIDER_AUTH);
-    // console.log(data)
-    // if(error)  Sentry.captureException(error);
-    // console.log(data)
-    // let variables = {};
+
     const handleSubmit = (event) => {
         event.preventDefault();
         getLoginDetails({
@@ -74,28 +67,26 @@ export default function SignIn() {
             }
         })
     }
-    // useEffect(() => {
-    //     setName('');
-    //     setPassword('');
-    //     setTrigger(false);
-    // }, [type])
     const [getLoginDetails, { loading, error }] = useLazyQuery(
         type === 'driver' ? GET_DRIVER_AUTH : GET_RIDER_AUTH, {
-        // fetchPolicy: "network-only",
         onCompleted: (data) => {
             const userDetails = type === 'driver' ? data?.uberdriver : data?.uberrider;
-            // console.log(userDetails?.length)
             if (!userDetails?.length) alert("invalid username or password");
-
             let UserExist = ''
             if (Array.isArray(userDetails) && userDetails.length > 0) {
                 UserExist = userDetails[0].id
             }
-            // console.log({ userDetails, data })
             if (userDetails?.length) {
                 localStorage.setItem('loginType', type);
                 navigate(`/${type}/${UserExist}`);
             }
+        },
+        onError: (error) => {
+            sendErrorToSentry({
+                name: "login",
+                message: "Fetching connection failed",
+                extra: [{ type: "errorEncounter", error }],
+            });
         }
     }
     )
@@ -110,7 +101,6 @@ export default function SignIn() {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                {/* <form className={classes.form} onSubmit={handleSubmit}> */}
                 <TextField variant="outlined"
                     required
                     fullWidth
@@ -148,10 +138,6 @@ export default function SignIn() {
                     autoComplete="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                />
-                <FormControlLabel
-                    control={<Checkbox value="remember" color="primary" />}
-                    label="Remember me"
                 />
                 <Button
                     type="submit"

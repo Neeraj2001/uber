@@ -33,7 +33,6 @@ const labels = {
     const handleListItemClick = (value) => {
         onClose(value);
     };
-    // console.log(pickRide)
     return (
         open && <Dialog aria-labelledby="simple-dialog-title" open={open} >
             <DialogTitle id="simple-dialog-title">Rating</DialogTitle>
@@ -48,7 +47,6 @@ const labels = {
                     precision={1}
                     defaultValue={5}
                     onChange={(event, newValue) => {
-                        // console.log(event.target.value, newValue)
                         setRating(Math.floor(newValue));
                     }}
                     onChangeActive={(event, newHover) => {
