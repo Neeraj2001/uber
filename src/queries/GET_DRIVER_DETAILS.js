@@ -11,6 +11,7 @@ query get_driver_details {
       vehical
       entry
       rides
+      lastride
     }
   }`;
   

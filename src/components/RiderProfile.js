@@ -64,6 +64,7 @@ export const RiderProfile = () => {
     const [updateDriverRides] = useMutation(UPDATE_DRIVER_RIDES);
 
     const [open, setOpen] = React.useState(false);
+    const [driveopen, setDriveOpen] = React.useState(true);
     const { id } = useParams();
 
     const updateRiderCache = (cache, { data }) => {
@@ -86,14 +87,15 @@ export const RiderProfile = () => {
             data: { uberdriver: [updatedData, ...currentValue.uberdriver] },
         });
     };
+    // let driveride = {};
     const Userdata = isRider ? rdata?.uberrider.find((e) => e.id === id)
         : ddata?.uberdriver.find((e) => e.id === id);
     let allRides = Userdata?.rides ? JSON.parse(Userdata?.rides) : [];
-    const pickRide = (() => {
-        const Count = isRider ? ddata?.uberdriver?.length : rdata?.uberrider?.length;
-        return isRider ? ddata?.uberdriver?.[Math.floor(Math.random() * (Count))] : rdata?.uberrider?.[Math.floor(Math.random() * (Count))];
+    let pickRide = (() => {
+        const Count = isRider ? ddata?.uberdriver?.length : '';
+        return isRider ? ddata?.uberdriver?.[Math.floor(Math.random() * (Count))] : rdata?.uberrider.find((e) => e.id === Userdata?.lastride);
     })();
-    
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -103,11 +105,18 @@ export const RiderProfile = () => {
             navigate('/login');
         });
     }, [])
-    if(rloading || dloading) return <h1>loading....</h1>
-    if(!Userdata) return <h1>Page not found 404</h1>;
+    useEffect(() => {
+        // console.log(loginType)
+        if (pickRide && loginType === 'driver') {
+            setDriveOpen(true);
+        }
+        // console.log(pickRide?.id)
+    }, [])
+    if (rloading || dloading) return <h1>loading....</h1>
+    if (!Userdata) return <h1>Page not found 404</h1>;
     const handleClose = (value) => {
         setOpen(false)
-
+        setDriveOpen(false);
         const index = allRides.findIndex(object => {
             return object.id === pickRide?.id;
         });
@@ -127,6 +136,7 @@ export const RiderProfile = () => {
                     trips: pickRide?.trips + 1,
                     entry: pickRide?.entry + 1,
                     rating: pickRide?.rating + value,
+                    lastride: id,
                 },
                 update: updateDriverCache
             })
@@ -144,7 +154,7 @@ export const RiderProfile = () => {
             updateRiderRatings({
                 variables: {
                     id: pickRide?.id,
-                    trips: pickRide?.trips + 1,
+                    trips: pickRide?.trips,
                     entry: pickRide?.entry + 1,
                     rating: pickRide?.rating + value,
                 },
@@ -156,27 +166,30 @@ export const RiderProfile = () => {
                     id: id,
                     trips: Userdata?.trips + 1,
                     rides: JSON.stringify(finaljson),
+                    lastride: '',
                 },
                 update: updateDriverCache
             })
         }
     };
+
+    // console.log(driveopen , Userdata?.lastride?.length > 1 ,pickRide?.id)
     return <div>
         <Box sx={{ width: '100%' }}>
             <Grid container spacing={2}>
                 <Grid className={classes.profile} item xs={4}>
-                     <div>
-                        <h1>{isRider ? 'Rider' : 'Driver'} profile</h1>        
+                    <div>
+                        <h1>{isRider ? 'Rider' : 'Driver'} profile</h1>
                         <h3>Name: {Userdata?.name}</h3>
-                        {!isRider? <h3><br/>Vehical: {Userdata?.vehical}</h3> : ''}
-                        <h3><br/>Contact: {Userdata?.contact}</h3>
+                        {!isRider ? <h3><br />Vehical: {Userdata?.vehical}</h3> : ''}
+                        <h3><br />Contact: {Userdata?.contact}</h3>
                         <div className={classes.flex}>
                             <div><h3>Rating: {Userdata?.entry ? Math.floor(Userdata?.rating / Userdata?.entry) : Userdata?.rating} </h3>
                             </div><div className={classes.star}><StarsRoundedIcon />
                             </div></div>
                         <h3>Rides: {Userdata?.trips}</h3>
-                        <Button className={classes.button} disable={isloading} onClick={handleClickOpen}>End Ride</Button> <br />
-                        <Button className={classes.button} onClick={() =>{localStorage.clear(); navigate('/login');}}>Logout</Button>
+                        {isRider ? <Button className={classes.button} disable={isloading} onClick={handleClickOpen}>End Ride</Button> : ''} <br />
+                        <Button className={classes.button} onClick={() => { localStorage.clear(); navigate('/login'); }}>Logout</Button>
                     </div>
                 </Grid>
                 <Grid item xs={8}>
@@ -186,5 +199,6 @@ export const RiderProfile = () => {
             </Grid>
         </Box>
         {open && <RatingDialog open={open} pickRide={pickRide} type={loginType} onClose={handleClose} />}
+        {driveopen && Userdata?.lastride?.length > 1 && pickRide && <RatingDialog open={driveopen} pickRide={pickRide} type={loginType} onClose={handleClose} />}
     </div>
 }
