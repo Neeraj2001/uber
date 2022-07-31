@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { GET_RIDER_DETAILS } from '../queries/GET_RIDER_DETAILS';
 import { GET_DRIVER_DETAILS } from '../queries/GET_DRIVER_DETAILS';
 import { Grid, Box, Typography, Button, Chip, Avatar, Divider } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams } from "react-router-dom";
 import { RatingCards } from '../components/RatingCards';
 // import Button from '@material-ui/core/Button';
@@ -23,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     endbutton: {
         backgroundColor: '#8c96e5',
         marginBottom: '10px',
+        width: 'fix-content',
     },
     logbutton: {
         backgroundColor: '#ec8e8e',
@@ -78,8 +80,8 @@ const useStyles = makeStyles((theme) => ({
     },
     cardDeck: { margin: "2rem 0rem 2rem 5rem !important" },
 }));
+
 export const RiderProfile = () => {
-    // console.log(localStorage.getItem('loginType'))
     const loginType = localStorage.getItem('loginType');
     const navigate = useNavigate();
     if (!loginType) navigate('/login')
@@ -102,10 +104,42 @@ export const RiderProfile = () => {
         });
     }
     const isloading = isRider ? rloading : dloading;
-    const [updateRiderRides] = useMutation(UPDATE_RIDER_RIDES);
-    const [updateDriverRating] = useMutation(UPDATE_DRIVER_RATINGS);
-    const [updateRiderRatings] = useMutation(UPDATE_RIDER_RATINGS);
-    const [updateDriverRides] = useMutation(UPDATE_DRIVER_RIDES);
+    const [updateRiderRides,{loading}] = useMutation(UPDATE_RIDER_RIDES,{
+        onError: (error) => {
+            sendErrorToSentry({
+                name: "UPDATE_RIDER_RIDES",
+                message: "updation failed",
+                extra: [{ type: "errorEncounter", error }],
+            });
+        }
+    });
+    const [updateDriverRating] = useMutation(UPDATE_DRIVER_RATINGS,{
+        onError: (error) => {
+            sendErrorToSentry({
+                name: "UPDATE_DRIVER_RATINGS",
+                message: "updation failed",
+                extra: [{ type: "errorEncounter", error }],
+            });
+        }
+    });
+    const [updateRiderRatings] = useMutation(UPDATE_RIDER_RATINGS,{
+        onError: (error) => {
+            sendErrorToSentry({
+                name: "UPDATE_RIDER_RATINGS",
+                message: "updation failed",
+                extra: [{ type: "errorEncounter", error }],
+            });
+        }
+    });
+    const [updateDriverRides] = useMutation(UPDATE_DRIVER_RIDES,{
+        onError: (error) => {
+            sendErrorToSentry({
+                name: "UPDATE_DRIVER_RIDES",
+                message: "updation failed",
+                extra: [{ type: "errorEncounter", error }],
+            });
+        }
+    });
 
     const [open, setOpen] = React.useState(false);
     const [driveopen, setDriveOpen] = React.useState(true);
@@ -132,7 +166,7 @@ export const RiderProfile = () => {
             data: { uberdriver: [updatedData, ...currentValue.uberdriver] },
         });
     };
-    // let driveride = {};
+
     const Userdata = isRider ? rdata?.uberrider.find((e) => e.id === id)
         : ddata?.uberdriver.find((e) => e.id === id);
     let allRides = Userdata?.rides ? JSON.parse(Userdata?.rides) : [];
@@ -149,14 +183,11 @@ export const RiderProfile = () => {
             localStorage.clear();
             navigate('/login');
         });
-    }, [])
-    useEffect(() => {
-        // console.log(loginType)
         if (pickRide && loginType === 'driver') {
             setDriveOpen(true);
         }
-        // console.log(pickRide?.id)
     }, [])
+
     if (isloading) return <h1>loading....</h1>
     if (!Userdata) return <h1>Page not found 404</h1>;
 
@@ -231,12 +262,10 @@ export const RiderProfile = () => {
         }
     }
 
-    // console.log(driveopen , Userdata?.lastride?.length > 1 ,pickRide?.id)
     const profileRating = Userdata?.entry ? Userdata?.rating / Userdata?.entry : Userdata?.rating;
     return <div>
         <Box sx={{ width: '100%' }}>
             <h1>Uber Rating</h1>
-            {/* <img src="/auto.png" style={{width: '110px', height: '90px'}} alt="Italian Trulli" /> */}
             <Grid container spacing={2}>
                 <Grid className={classes.profile} item xs={2}>
                     <div>
@@ -253,7 +282,7 @@ export const RiderProfile = () => {
                                 <div className={classes.flexItems}><LocalTaxiIcon className={classes.icon} /><Typography> {Userdata?.trips}</Typography></div>
                             </div>
                         </div>
-                        {isRider ? <Button className={classes.endbutton} onClick={handleClickOpen}>End Ride</Button> : ''} <br />
+                        {isRider ? <Button className={classes.endbutton} disabled={loading} onClick={handleClickOpen}>End Ride{loading?<CircularProgress/>:''}</Button> : ''} <br />
                         <Button className={classes.logbutton} onClick={() => { localStorage.clear(); navigate('/login'); }}>Logout</Button>
                     </div>
                 </Grid>
@@ -265,7 +294,7 @@ export const RiderProfile = () => {
                                     <Grid item key={index}>
                                         <RatingCards rides={rides} />
                                     </Grid>
-                                ))) : isRider ? <h1>No Rides to show, Click on End ride</h1>:<h1>you havent made any trips</h1>}
+                                ))) : isRider ? <h1>No Rides to show, Click on End ride</h1> : <h1>you havent made any trips</h1>}
 
                         </Grid>
                     </div>

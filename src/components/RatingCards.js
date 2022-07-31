@@ -71,6 +71,5 @@ export const RatingCards = (props) => {
                 ><Avatar alt={rides?.name?.toUpperCase()} src="/broken-image.jpg" className={classes.orange} /></CardMedia>
             </div>
         </Card>
-        // )
     );
 }

@@ -28,7 +28,6 @@ const labels = {
  const RatingDialog = (props) => {
     const classes = useStyles();
     const { onClose, pickRide, open, type } = props;
-    // console.log(pickRide)
     const [rating, setRating] = useState(3);
     const [hover, setHover] = React.useState(-1);
     const handleListItemClick = (value) => {
