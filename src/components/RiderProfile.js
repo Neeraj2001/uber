@@ -263,6 +263,7 @@ export const RiderProfile = () => {
     }
 
     const profileRating = Userdata?.entry ? Userdata?.rating / Userdata?.entry : Userdata?.rating;
+    const haveLastRide = Userdata?.lastride?.length > 1;
     return <div>
         <Box sx={{ width: '100%' }}>
             <h1>Uber Rating</h1>
@@ -302,6 +303,6 @@ export const RiderProfile = () => {
             </Grid>
         </Box>
         {open && <RatingDialog open={open} pickRide={pickRide} type={loginType} onClose={handleClose} />}
-        {driveopen && Userdata?.lastride?.length > 1 && pickRide && <RatingDialog open={driveopen} pickRide={pickRide} type={loginType} onClose={handleClose} />}
+        {driveopen && haveLastRide && <RatingDialog open={driveopen} pickRide={pickRide} type={loginType} onClose={handleClose} />}
     </div>
 }
