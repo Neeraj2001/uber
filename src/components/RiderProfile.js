@@ -3,26 +3,36 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_RIDER_DETAILS } from '../queries/GET_RIDER_DETAILS';
 import { GET_DRIVER_DETAILS } from '../queries/GET_DRIVER_DETAILS';
-import { Grid, Box } from '@material-ui/core';
+import { Grid, Box, Typography, Button, Chip, Avatar, Divider } from '@material-ui/core';
 import { useParams } from "react-router-dom";
 import { RatingCards } from '../components/RatingCards';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import RatingDialog from '../components/RatingDialog';
 import { UPDATE_RIDER_RIDES } from '../queries/UPDATE_RIDER_RIDES';
-import StarsRoundedIcon from '@material-ui/icons/StarsRounded';
 import { UPDATE_DRIVER_RATINGS } from '../queries/UPDATE_DRIVER_RATINGS';
 import { useNavigate } from 'react-router-dom';
 import { UPDATE_RIDER_RATINGS } from '../queries/UPDATE_RIDER_RATINGS';
 import { UPDATE_DRIVER_RIDES } from '../queries/UPDATE_DRIVER_RIDES';
 import { sendErrorToSentry } from "../index.js";
-const useStyles = makeStyles(() => ({
-    button: {
-        backgroundColor: 'blue',
+import StarsRoundedIcon from '@material-ui/icons/StarsRounded';
+import CallIcon from '@material-ui/icons/Call';
+import LocalTaxiIcon from '@material-ui/icons/LocalTaxi';
+import { deepPurple } from '@material-ui/core/colors';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
+const useStyles = makeStyles((theme) => ({
+    endbutton: {
+        backgroundColor: '#8c96e5',
+        marginBottom: '10px',
+    },
+    logbutton: {
+        backgroundColor: '#ec8e8e',
         marginBottom: '10px',
     },
     profile: {
-        backgroundColor: 'skyblue',
+        backgroundColor: '#b7ffc4',
         paddingLeft: '70px',
+        justifyContent: 'center',
+        textAlign: '-webkit-center',
     },
     star: {
         color: 'green',
@@ -32,7 +42,41 @@ const useStyles = makeStyles(() => ({
     },
     flex: {
         display: 'flex',
-    }
+    },
+    flexItems: {
+        display: 'flex',
+        margin: '10px',
+        justifyContent: 'flex-start',
+
+    },
+    name: {
+        fontSize: '25px',
+        // fontFamily: 'Roboto',
+        alignItems: 'center',
+    },
+    margin: {
+        marginTop: '35px',
+    },
+    purple: {
+        color: theme.palette.getContrastText(deepPurple[500]),
+        backgroundColor: deepPurple[500],
+        margin: '10px',
+        height: '80px',
+        width: '80px',
+    },
+    border: {
+        marginTop: '30px',
+    },
+    icon: {
+        marginRight: '15px',
+    },
+    rating: {
+        color: '#efa300 !important',
+    },
+    label: {
+        fontWeight: 600,
+    },
+    cardDeck: { margin: "2rem 0rem 2rem 5rem !important" },
 }));
 export const RiderProfile = () => {
     // console.log(localStorage.getItem('loginType'))
@@ -65,6 +109,7 @@ export const RiderProfile = () => {
 
     const [open, setOpen] = React.useState(false);
     const [driveopen, setDriveOpen] = React.useState(true);
+
     const { id } = useParams();
 
     const updateRiderCache = (cache, { data }) => {
@@ -112,8 +157,9 @@ export const RiderProfile = () => {
         }
         // console.log(pickRide?.id)
     }, [])
-    if (rloading || dloading) return <h1>loading....</h1>
+    if (isloading) return <h1>loading....</h1>
     if (!Userdata) return <h1>Page not found 404</h1>;
+
     const handleClose = (value) => {
         setOpen(false)
         setDriveOpen(false);
@@ -164,7 +210,7 @@ export const RiderProfile = () => {
             updateDriverRides({
                 variables: {
                     id: id,
-                    trips: Userdata?.trips + 1,
+                    trips: Userdata?.trips,
                     rides: JSON.stringify(finaljson),
                     lastride: '',
                 },
@@ -172,29 +218,57 @@ export const RiderProfile = () => {
             })
         }
     };
+    function vehical(vehical) {
+        switch (vehical) {
+            case 'car':
+                return <img src="/car.png" style={{ width: '150px', height: '110px', marginBottom: '-25px' }} alt="Car" />
+            case 'auto':
+                return <img src="/auto.png" style={{ width: '120px', height: '100px', marginBottom: '-25px' }} alt="Auto" />
+            case 'bike':
+                return <img src="/bike.png" style={{ width: '120px', height: '80px', marginTop: '15px', marginBottom: '-15px' }} alt="Bike" />
+            default:
+                return <img src="/car.png" style={{ width: '150px', height: '110px', marginBottom: '-25px' }} alt="Car" />
+        }
+    }
 
     // console.log(driveopen , Userdata?.lastride?.length > 1 ,pickRide?.id)
+    const profileRating = Userdata?.entry ? Userdata?.rating / Userdata?.entry : Userdata?.rating;
     return <div>
         <Box sx={{ width: '100%' }}>
+            <h1>Uber Rating</h1>
+            {/* <img src="/auto.png" style={{width: '110px', height: '90px'}} alt="Italian Trulli" /> */}
             <Grid container spacing={2}>
-                <Grid className={classes.profile} item xs={4}>
+                <Grid className={classes.profile} item xs={2}>
                     <div>
                         <h1>{isRider ? 'Rider' : 'Driver'} profile</h1>
-                        <h3>Name: {Userdata?.name}</h3>
-                        {!isRider ? <h3><br />Vehical: {Userdata?.vehical}</h3> : ''}
-                        <h3><br />Contact: {Userdata?.contact}</h3>
-                        <div className={classes.flex}>
-                            <div><h3>Rating: {Userdata?.entry ? Math.floor(Userdata?.rating / Userdata?.entry) : Userdata?.rating} </h3>
-                            </div><div className={classes.star}><StarsRoundedIcon />
-                            </div></div>
-                        <h3>Rides: {Userdata?.trips}</h3>
-                        {isRider ? <Button className={classes.button} disable={isloading} onClick={handleClickOpen}>End Ride</Button> : ''} <br />
-                        <Button className={classes.button} onClick={() => { localStorage.clear(); navigate('/login'); }}>Logout</Button>
+                        <Avatar className={classes.purple} />
+                        <Typography className={classes.name}>{Userdata?.name}</Typography>
+                        <Chip classes={{ label: classes.label }} label={(Math.round(profileRating * 10) / 10)} avatar={<StarsRoundedIcon className={classes.rating} />} />
+                        <Divider className={classes.border} />
+                        {!isRider ? <Typography>{vehical(Userdata?.vehical)}</Typography> : ''}
+                        <div>
+                            <div className={classes.margin}>
+                                <div className={classes.flexItems}> <LocationOnIcon className={classes.icon} /><Typography> India</Typography></div>
+                                <div className={classes.flexItems}><CallIcon className={classes.icon} /><Typography> {Userdata?.contact}</Typography></div>
+                                <div className={classes.flexItems}><LocalTaxiIcon className={classes.icon} /><Typography> {Userdata?.trips}</Typography></div>
+                            </div>
+                        </div>
+                        {isRider ? <Button className={classes.endbutton} onClick={handleClickOpen}>End Ride</Button> : ''} <br />
+                        <Button className={classes.logbutton} onClick={() => { localStorage.clear(); navigate('/login'); }}>Logout</Button>
                     </div>
                 </Grid>
                 <Grid item xs={8}>
+                    <div className={classes.cardDeck}>
+                        <Grid container spacing={3}>
+                            {allRides.length > 0 ?
+                                (allRides.map((rides, index) => (
+                                    <Grid item key={index}>
+                                        <RatingCards rides={rides} />
+                                    </Grid>
+                                ))) : isRider ? <h1>No Rides to show, Click on End ride</h1>:<h1>you havent made any trips</h1>}
 
-                    <RatingCards rides={allRides} />
+                        </Grid>
+                    </div>
                 </Grid>
             </Grid>
         </Box>
