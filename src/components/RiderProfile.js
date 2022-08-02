@@ -283,7 +283,7 @@ export const RiderProfile = () => {
                                 <div className={classes.flexItems}><LocalTaxiIcon className={classes.icon} /><Typography> {Userdata?.trips}</Typography></div>
                             </div>
                         </div>
-                        {isRider ? <Button className={classes.endbutton} disabled={loading} onClick={handleClickOpen}>End Ride{loading?<CircularProgress/>:''}</Button> : ''} <br />
+                        {isRider ? <Button className={classes.endbutton} disabled={loading} onClick={handleClickOpen}>End Ride{loading?<CircularProgress size='1.5rem' />:''}</Button> : ''} <br />
                         <Button className={classes.logbutton} onClick={() => { localStorage.clear(); navigate('/login'); }}>Logout</Button>
                     </div>
                 </Grid>
